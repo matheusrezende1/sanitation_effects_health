@@ -121,20 +121,26 @@ df <- df %>%
     grande_porte = ifelse(populacao_municipio > 200000,1,0)) %>% 
   filter(!is.na(codigo_mun))
 
-# descritivas 
-df %>% filter(ano == 2022) %>%  
-  summarise(cobertura_agua_media = sum(populacao_atendida_agua, na.rm = T)/sum(populacao_municipio, na.rm = T),
-            cobertura_esgoto = sum(populacao_atendida_esgoto, na.rm = T)/sum(populacao_municipio, na.rm = T))
-
-inv_ano <- df %>% group_by(ano) %>%  
-  summarise(total_investido_agua = sum(investimento_proprio_agua)/1000000,
-            total_investido_egt = sum(investimento_proprio_esgoto)/1000000,
-            cobertura_agua_media = sum(populacao_atendida_agua, na.rm = T)/sum(populacao_municipio, na.rm = T),
-            cobertura_esgoto = sum(populacao_atendida_esgoto, na.rm = T)/sum(populacao_municipio, na.rm = T))
-
-df %>% filter(ano == 2022) %>% 
-  summarise(total_investido_agua = sum(investimento_proprio_agua)/sum(populacao_municipio, na.rm = T),
-            total_investido_esgt = sum(investimento_proprio_esgoto)/sum(populacao_municipio, na.rm = T))
-
+df <- df %>% filter(ano < 2020) %>% 
+  mutate(investimento_proprio_agua_MM = investimento_proprio_agua/1000000,
+         investimento_proprio_esgoto_MM = investimento_proprio_esgoto/1000000,
+         investimento_proprio_total_MM = investimento_proprio_total/1000000,
+         economias_ativas_agua_M = economias_ativas_agua/1000,
+         pop_M = populacao_municipio/1000,
+         cobertura_esgoto = (populacao_atendida_esgoto/populacao_municipio)*100,
+         cobertura_agua = (populacao_atendida_agua/populacao_municipio)*100) %>% 
+  arrange(codigo_mun, ano) %>%
+  group_by(codigo_mun) %>%
+  mutate(variacao_economias_ativas_agua = economias_ativas_agua - dplyr::lag(economias_ativas_agua),
+         variacao_cobertura_agua = cobertura_agua - dplyr::lag(cobertura_agua),
+         variacao_cobertura_esgoto = cobertura_esgoto - dplyr::lag(cobertura_esgoto),
+         variacao_populacao = populacao_municipio - dplyr::lag(populacao_municipio),
+         variacao_extensao_rede_agua = extensao_rede_agua - dplyr::lag(extensao_rede_agua),
+         variacao_economias_ativas_esgoto = economias_ativas_esgoto - dplyr::lag(economias_ativas_esgoto),
+         variacao_perdas_agua = indice_perdas_agua - dplyr::lag(indice_perdas_agua),
+         investimento_media_movel_agua = (investimento_proprio_agua_MM + dplyr::lag(investimento_proprio_agua_MM,1))/2,
+         investimento_media_movel_esgoto = (investimento_proprio_esgoto_MM + dplyr::lag(investimento_proprio_esgoto_MM,1))/2,
+         investimento_media_movel_total = (investimento_proprio_total_MM + dplyr::lag(investimento_proprio_total_MM,1))/2) %>%
+  ungroup()
 
 writexl::write_xlsx(df, "processed data/snis_tratada_2014_2022.xlsx")
