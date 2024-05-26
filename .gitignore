@@ -47,3 +47,7 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+raw_data/input_PNS_2019.sas
+raw_data/input_PNS_2019.txt
+raw_data/PNS_2019.txt
