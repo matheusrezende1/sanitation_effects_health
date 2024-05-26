@@ -8,13 +8,14 @@ library(mfx)
 #############################
 # DATA CLEANING
 #############################
-
+getwd()
 # Pesquisa Nacional de Saúde (IBGE) 2019
 # Uploading it with read_pns function (PNSIBGE package)
 
-#setwd("./raw_data")
+# Data ignored, but can be downloaded at:
+# https://www.ibge.gov.br/estatisticas/sociais/saude/9160-pesquisa-nacional-de-saude.html?=&t=downloads
 
-dataPNS <- read_pns(microdata="PNS_2019.txt", input_txt="input_PNS_2019.txt")
+dataPNS <- read_pns(microdata="./raw_data/PNS_2019.txt", input_txt="input_PNS_2019.txt")
 dataPNS <- pns_labeller(data_pns=dataPNS, dictionary.file="dicionario_PNS_microdados_2019.xls")
 
 # Selecting relevant variables
@@ -83,4 +84,5 @@ df_pns <- df_pns %>%
     TRUE ~ NA_character_ # Caso algum estado não se encaixe nas categorias acima
   ))
 
-#writexl::write_xlsx(df_pns, "pns_tratada.xlsx")
+
+write.csv(df_pns, "processed data/pns_tratada.csv")
