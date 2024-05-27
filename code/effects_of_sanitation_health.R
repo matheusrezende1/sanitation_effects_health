@@ -5,31 +5,88 @@ library(readr)
 library(PNSIBGE)
 library(mfx)
 library(stargazer)
+library(ggthemes)
 
 df_snis <- readxl::read_xlsx("./processed data/snis_tratada_2014_2022.xlsx")
 df_datasus <- readxl::read_xlsx("./processed data/sihsus_tratada.xlsx")
 
 df <- df_snis %>% left_join(df_datasus, by = c("codigo_mun", "ano"))
 
+#################################################################################
+# PLOTS
+#################################################################################
+
 df %>%
-  mutate(internacoes_por_cem_mil = internacoes/(populacao_municipio/100000)) %>% 
-  group_by(ano) %>%
-  summarise(internacoes_por_cem_mil = mean(internacoes_por_cem_mil, na.rm = TRUE),
-            investimento_esgoto = sum(investimento_proprio_esgoto, na.rm = TRUE)/1000000) %>% 
-  ggplot(aes(x = investimento_esgoto, y = internacoes_por_cem_mil)) +
-  geom_point(aes(color = as.factor(ano)), size = 3) +  # Adicionar pontos coloridos por ano
-  geom_text(aes(label = ano), vjust = -1, hjust = 1.5, color = "black")  +
-  labs(x = "Investimento em Esgoto",
-       y = "Internações por Milhão",
-       color = "Ano") +
-  ylim(0,450) +
-  theme_minimal() +  # Tema minimalista
-  ggtitle("Relação entre Investimento em Esgoto e Internações por Milhão por Ano")
+  group_by(uf) %>% 
+  summarise(cobertura_media_esgoto_uf = sum(populacao_atendida_esgoto, na.rm = T)/ sum(populacao_municipio, na.rm = T),
+            internacoes_por_cem_mil = sum(internacoes, na.rm = T)/(sum(populacao_municipio, na.rm = T)/100000),
+            populacao_uf = sum(populacao_municipio, na.rm = T)) %>%
+  ungroup() %>% 
+  mutate(regiao = case_when(
+    uf %in% c("SP", "MG", "RJ", "ES") ~ "Sudeste",
+    uf %in% c("PR", "SC", "RS") ~ "Sul",
+    uf %in% c("MT", "MS", "GO", "DF") ~ "Centro Oeste",
+    uf %in% c("AC", "RO", "AM", "RR", "PA", "AP", "TO") ~ "Norte",
+    uf %in% c("MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA") ~ "Nordeste")) %>% 
+  ggplot() + geom_point(aes(x = cobertura_media_esgoto_uf, y = internacoes_por_cem_mil, size = populacao_uf, color = regiao), alpha = 0.8) +
+  guides(
+    size = FALSE,  
+    color = guide_legend(override.aes = list(size = 3))) +
+  labs(x = "Cobertura Média de Esgoto por UF",
+       y = "Internações por Cem Mil Habitantes",
+       color = "Região"
+  ) +
+  theme_minimal() +  
+  ggtitle("Relação entre Cobertura de Esgoto e Internações por 100 Mil Habitantes") +
+  theme(
+    text = element_text(size = 12),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 12), 
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12),
+    legend.position = "bottom"
+  )
 
-# Regressions
+df %>%
+  group_by(uf) %>% 
+  summarise(cobertura_media_agua_uf = sum(populacao_atendida_agua, na.rm = T)/ sum(populacao_municipio, na.rm = T),
+            internacoes_por_cem_mil = sum(internacoes, na.rm = T)/(sum(populacao_municipio, na.rm = T)/100000),
+            populacao_uf = sum(populacao_municipio, na.rm = T)) %>%
+  ungroup() %>% 
+  mutate(regiao = case_when(
+    uf %in% c("SP", "MG", "RJ", "ES") ~ "Sudeste",
+    uf %in% c("PR", "SC", "RS") ~ "Sul",
+    uf %in% c("MT", "MS", "GO", "DF") ~ "Centro Oeste",
+    uf %in% c("AC", "RO", "AM", "RR", "PA", "AP", "TO") ~ "Norte",
+    uf %in% c("MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA") ~ "Nordeste")) %>% 
+  ggplot() + geom_point(aes(x = cobertura_media_agua_uf, y = internacoes_por_cem_mil, size = populacao_uf, color = regiao), alpha = 0.8) +
+  guides(
+    size = FALSE,  
+    color = guide_legend(override.aes = list(size = 3))) +
+  labs(x = "Cobertura Média de Água por UF",
+       y = "Internações por Cem Mil Habitantes",
+       color = "Região"
+  ) +
+  theme_minimal() + 
+  ggtitle("Relação entre Cobertura de Água e Internações por 100 Mil Habitantes") +
+  theme(
+    text = element_text(size = 12), 
+    plot.title = element_text(hjust = 0.5, size = 12), 
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 12),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12),
+    legend.position = "bottom"
+  )
 
-ols_internacoes_agua <- lm(variacao_internacoes ~ investimento_media_movel_agua + 
-                             variacao_populacao + as.factor(uf), data = dfteste)
+#################################################################################
+# REGRESSIONS
+#################################################################################
+
+df <- df %>% 
+  
+ols_internacoes_agua <- lm(variacao_internacoes ~ investimento_media_movel_agua + variacao_populacao + as.factor(uf), data = df)
 summary(ols_internacoes_agua) # 1 milhao, 0.18 menos internacoes
 300*0.18*400
 
