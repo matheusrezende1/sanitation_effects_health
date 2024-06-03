@@ -84,37 +84,74 @@ df %>%
 # REGRESSIONS
 #################################################################################
 
-df <- df %>% 
-  
+# impact of investment over number of hospitalizations 
 ols_internacoes_agua <- lm(variacao_internacoes ~ investimento_media_movel_agua + variacao_populacao + as.factor(uf), data = df)
-summary(ols_internacoes_agua) # 1 milhao, 0.18 menos internacoes
-300*0.18*400
+summary(ols_internacoes_agua) # R$1MM -> 0.18 less hospitalizations
+
+ols_internacoes_esgoto <- lm(variacao_internacoes ~ investimento_media_movel_esgoto + variacao_populacao + as.factor(uf), data = df)
+summary(ols_internacoes_esgoto) # no effect
 
 
-ols_internacoes_agua <- lm(variacao_internacoes ~ variacao_cobertura_agua +
-                             variacao_populacao + as.factor(uf), data = dfteste)
-summary(ols_internacoes_agua)
-
-ols_internacoes_esgoto <- lm(variacao_internacoes ~ variacao_cobertura_esgoto +
-                               variacao_populacao + as.factor(uf), data = dfteste)
-summary(ols_internacoes_esgoto)
-
-# impacto do investimento sobre custo internacao
-ols_custo_internacoes_agua <- lm(variacao_custo_internacao ~ investimento_media_movel_agua + variacao_populacao + as.factor(uf), data = dfteste)
+# impact of investment over hospitalized costs 
+ols_custo_internacoes_agua <- lm(variacao_custo_internacao ~ investimento_media_movel_agua + variacao_populacao + as.factor(uf), data = df)
 summary(ols_custo_internacoes_agua)
 
-ols_custo_internacoes_esgoto <- lm(variacao_custo_internacao ~ investimento_media_movel_esgoto + variacao_populacao + as.factor(uf), data = dfteste)
+ols_custo_internacoes_esgoto <- lm(variacao_custo_internacao ~ investimento_media_movel_esgoto + variacao_populacao + as.factor(uf), data = df)
 summary(ols_custo_internacoes_esgoto)
 
 
-# impacto do investimento sobre dias permanencia
-ols_dias_permanencia_agua <- lm(variacao_dias_permanencia ~ investimento_media_movel_agua + variacao_populacao + as.factor(uf), data = dfteste)
+# impact of investment over hospitalization duration
+ols_dias_permanencia_agua <- lm(variacao_dias_permanencia ~ investimento_media_movel_agua + variacao_populacao + as.factor(uf), data = df)
 summary(ols_dias_permanencia_agua)
 
-ols_dias_permanencia_esgoto <- lm(variacao_dias_permanencia ~ investimento_media_movel_esgoto + variacao_populacao + as.factor(uf), data = dfteste)
+ols_dias_permanencia_esgoto <- lm(variacao_dias_permanencia ~ investimento_media_movel_esgoto + variacao_populacao + as.factor(uf), data = df)
 summary(ols_dias_permanencia_esgoto)
 
-# Fixed effects
+stargazer(ols_internacoes_agua, 
+          ols_internacoes_esgoto)
+          
+          
+stargazer(ols_internacoes_agua, ols_internacoes_esgoto, type = "text",
+          title = "Impact of Water and Sewage Investment on Hospitalization",
+          omit = c("uf", "Constant"),
+          covariate.labels = c("Water Investment", "Sewage Investment", "Population"),
+          dep.var.labels.include = F,
+          dep.var.caption = "Variation in Water and Sewage Investments",
+          add.lines = list(c("UF Dummies?", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes")))
+
+stargazer(ols_dias_permanencia_agua, ols_dias_permanencia_esgoto, type = "text",
+          title = "Impact of Water and Sewage Investment on Hospitalization Duration",
+          omit = c("uf", "Constant"),
+          covariate.labels = c("Water Investment", "Sewage Investment", "Population"),
+          dep.var.labels.include = F,
+          dep.var.caption = "Variation in Water and Sewage Investments",
+          add.lines = list(c("UF Dummies?", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes")))
+
+
+# impact of coverage over number of hospitalizations 
+ols_cobertura_int_agua <- lm(variacao_internacoes ~ variacao_cobertura_agua + variacao_populacao + as.factor(uf), data = df)
+summary(ols_cobertura_int_agua)
+
+ols_cobertura_int_esgoto <- lm(variacao_internacoes ~ variacao_cobertura_esgoto +
+                                 variacao_populacao + as.factor(uf), data = df)
+summary(ols_cobertura_int_esgoto)
+
+
+
+stargazer(ols_cobertura_int_agua, ols_cobertura_int_esgoto, type = "text",
+          title = "Impact of Water and Sewage Coverage on Hospitalization",
+          omit = c("uf", "Constant"),
+          covariate.labels = c("Water Investment", "Sewage Investment", "Population"),
+          dep.var.labels.include = F,
+          dep.var.caption = "Variation in Water and Sewage Investments",
+          add.lines = list(c("UF Dummies?", "Yes", "Yes")))
+
+
+############################################################################
+# ROBUSTNESS
+############################################################################
+
+
 ef <- plm(internacoes ~  cobertura_esgoto + cobertura_agua + pop_M,
-          data = dfteste, index = c("codigo_mun", "ano"), model = "within")
+          data = df, index = c("codigo_mun", "ano"), model = "within")
 summary(ef)
