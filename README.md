@@ -15,4 +15,4 @@ This project is organized in three folders:
 
 ## Results and evaluation
 
-(https://github.com/matheusrezende1/sanitation_effects_on_health/tree/main/figs/internacoes_esgoto_uf.png?raw=true)
+![Alt text](https://github.com/matheusrezende1/sanitation_effects_on_health/tree/main/figs/internacoes_esgoto_uf.png?raw=true)
