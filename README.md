@@ -1,3 +1,3 @@
 # The effects of sanitation on public and individual health
 
-A public repository for a research project in which I investigate the impacts of the presence of sanitation on health
+A public repository for a research project in which I investigate the impacts of the presence of sanitation on health. The idea of the research is first to estimate the effects of water and sewage investments on sanitation coverage. After this, I aim to estimate the effects of the coverage expansion on indivual and public health. The economic literature for Brazil is still scarce in this topic, although there are works that suggest that access to clean water and adequate sewage services can reduce the incidence of waterborne diseases, such as giardiasis, cryptosporidiosis, amebiasis, gastroenteritis, typhoid and paratyphoid fevers, infectious hepatitis, and cholera.
