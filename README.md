@@ -14,3 +14,5 @@ This project is organized in three folders:
 - Code: results from regressions estimations
 
 ## Results and evaluation
+
+![alt text](https://github.com/matheusrezende1/sanitation_effects_on_health/tree/main/figs/internacoes_esgoto_uf.png?raw=true)
