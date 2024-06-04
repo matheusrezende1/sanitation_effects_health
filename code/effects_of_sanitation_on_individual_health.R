@@ -36,7 +36,7 @@ prop_all %>% left_join(prop_sick, by = "rede_esgoto") %>%
        title = "Proporção de pessoas com e sem saneamento, geral e acamados") +
   theme_minimal()
   
-  
+ggsave("./figs/prob_of_sick_sanitation.png")  
 #################################################################################
 # REGRESSIONS
 #################################################################################

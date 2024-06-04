@@ -47,6 +47,7 @@ df %>%
     legend.title = element_text(size = 12),
     legend.position = "bottom"
   )
+ggsave("./figs/internacoes_esgoto_uf.png")  
 
 df %>%
   group_by(uf) %>% 
@@ -79,6 +80,7 @@ df %>%
     legend.title = element_text(size = 12),
     legend.position = "bottom"
   )
+ggsave("./figs/internacoes_agua_uf.png")  
 
 #################################################################################
 # REGRESSIONS
